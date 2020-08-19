@@ -5,15 +5,12 @@ jobs:
       - image: circleci/openjdk:8-jdk
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: false
-          version: 18.06.0-ce
-      - run:
-          name: Grant maven permission
-          command: chmod +x mvnw
+      - setup_remote_docker
       - run:
           name: Build spring boot jar
-          command: mvn clean package -DskipTests
+          command: |
+            chmod +x mvnw
+            mvn clean package -DskipTests
       - run:
           name: Build Docker image
           command: |
@@ -21,7 +18,12 @@ jobs:
             echo 'export PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)' >> $BASH_ENV
             echo 'export IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME' >> $BASH_ENV
             source $BASH_ENV
-            docker build -t $IMAGE_NAME:$IMAGE_TAG -f Dockerfile.local .
+            docker build -t $IMAGE_NAME:$IMAGE_TAG .
+  publish-latest:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - setup_remote_docker
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
@@ -35,6 +37,12 @@ workflows:
         jobs:
           - build:
               context: DOCKER
+              filters:
+                branches:
+                  only: master
+          - publish-latest:
+              requires:
+                - build
               filters:
                 branches:
                   only: master
