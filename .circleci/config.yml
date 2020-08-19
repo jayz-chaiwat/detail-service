@@ -1,6 +1,10 @@
 version: 2
 jobs:
   build:
+    environment:
+      IMAGE_NAME: ""
+      IMAGE_TAG: ""
+      $PROJECT_NAME: ""
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
