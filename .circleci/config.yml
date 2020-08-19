@@ -17,23 +17,21 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-            PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
-            IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME
+            echo 'export IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
+            echo 'export PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)' >> $BASH_ENV
+            echo 'export IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME' >> $BASH_ENV
+            source $BASH_ENV
             docker build -t $IMAGE_NAME:$IMAGE_TAG -f Dockerfile.local .
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
-            IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-            PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
-            IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME
             echo "$DOCKER_USER" | docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
             docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
             docker push $IMAGE_NAME:latest
             docker push $IMAGE_NAME:$IMAGE_TAG
 workflows:
     version: 2
-    build-master:
+    build:
         jobs:
           - build:
               context: DOCKER
