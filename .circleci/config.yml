@@ -7,6 +7,13 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Initial Environment variavle
+          command: |
+            echo 'export IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
+            echo 'export PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)' >> $BASH_ENV
+            echo 'export IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
           name: Build spring boot jar
           command: |
             chmod +x mvnw
@@ -14,16 +21,19 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            echo 'export IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
-            echo 'export PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)' >> $BASH_ENV
-            echo 'export IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME' >> $BASH_ENV
-            source $BASH_ENV
             docker build -t $IMAGE_NAME:$IMAGE_TAG .
   publish-latest:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
       - setup_remote_docker
+      - run:
+          name: Initial Environment variavle
+          command: |
+            echo 'export IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
+            echo 'export PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)' >> $BASH_ENV
+            echo 'export IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME' >> $BASH_ENV
+            source $BASH_ENV
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
