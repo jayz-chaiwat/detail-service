@@ -26,6 +26,7 @@ jobs:
           command: |
             IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
             PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+            IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME
             echo "$DOCKER_USER" | docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
             docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
             docker push $IMAGE_NAME:latest
