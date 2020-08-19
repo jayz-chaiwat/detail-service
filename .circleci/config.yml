@@ -12,12 +12,15 @@ jobs:
           name: Grant maven permission
           command: chmod +x mvnw
       - run:
+          name: Build spring boot jar
+          command: mvn clean package -DskipTests
+      - run:
           name: Build Docker image
           command: |
             IMAGE_TAG=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
             PROJECT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
             IMAGE_NAME=$DOCKER_USER/$PROJECT_NAME
-            docker build -t $IMAGE_NAME:$IMAGE_TAG .
+            docker build -t $IMAGE_NAME:$IMAGE_TAG -f Dockerfile.local .
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
