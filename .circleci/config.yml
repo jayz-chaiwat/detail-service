@@ -84,7 +84,9 @@ workflows:
           context: DOCKER
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - develop
       - publish-latest:
           context: DOCKER
           requires:
